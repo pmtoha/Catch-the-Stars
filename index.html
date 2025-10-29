@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Catch the Stars</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(to bottom, #1a2a6c, #2c5282);
+            overflow: hidden;
+        }
+        
+        .game-container {
+            width: 100%;
+            max-width: 400px;
+            height: 100vh;
+            max-height: 700px;
+            position: relative;
+            background: linear-gradient(to bottom, #0f2027, #203a43, #2c5364);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            touch-action: none;
+        }
+        
+        .game-ui {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            color: white;
+            font-size: 18px;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+            z-index: 10;
+        }
+        
+        .game-over, .game-start {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            text-align: center;
+            z-index: 20;
+        }
+        
+        .game-over h2, .game-start h2 {
+            font-size: 32px;
+            margin-bottom: 20px;
+        }
+        
+        .game-over p, .game-start p {
+            font-size: 18px;
+            margin-bottom: 30px;
+        }
+        
+        .btn {
+            padding: 12px 30px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            font-size: 18px;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            background-color: #45a049;
+            transform: scale(1.05);
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-ui">
+            <div>Score: <span id="score">0</span></div>
+            <div>Lives: <span id="lives">3</span></div>
+        </div>
+        
+        <canvas id="gameCanvas"></canvas>
+        
+        <div class="game-start" id="startScreen">
+            <h2>Catch the Stars</h2>
+            <p>Move the basket to catch falling stars.<br>Avoid the bombs!</p>
+            <button class="btn" id="startBtn">Play Game</button>
+        </div>
+        
+        <div class="game-over hidden" id="gameOverScreen">
+            <h2>Game Over</h2>
+            <p>Your score: <span id="finalScore">0</span></p>
+            <button class="btn" id="restartBtn">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const canvas = document.getElementById('gameCanvas');
+            const ctx = canvas.getContext('2d');
+            const scoreElement = document.getElementById('score');
+            const livesElement = document.getElementById('lives');
+            const startScreen = document.getElementById('startScreen');
+            const gameOverScreen = document.getElementById('gameOverScreen');
+            const finalScoreElement = document.getElementById('finalScore');
+            const startBtn = document.getElementById('startBtn');
+            const restartBtn = document.getElementById('restartBtn');
+            
+            // Set canvas size
+            function resizeCanvas() {
+                canvas.width = canvas.offsetWidth;
+                canvas.height = canvas.offsetHeight;
+            }
+            
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+            
+            // Game variables
+            let gameRunning = false;
+            let score = 0;
+            let lives = 3;
+            let basketWidth = 80;
+            let basketHeight = 20;
+            let basketX = canvas.width / 2 - basketWidth / 2;
+            let basketY = canvas.height - 40;
+            let basketSpeed = 8;
+            let touchX = null;
+            
+            // Falling objects
+            let fallingObjects = [];
+            let objectSpeed = 3;
+            let spawnRate = 60; // frames between spawns
+            let frameCount = 0;
+            
+            // Touch controls
+            canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+            canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+            canvas.addEventListener('touchend', handleTouchEnd, { passive: false });
+            
+            // Mouse controls for testing on desktop
+            canvas.addEventListener('mousedown', handleMouseDown);
+            canvas.addEventListener('mousemove', handleMouseMove);
+            canvas.addEventListener('mouseup', handleMouseUp);
+            
+            function handleTouchStart(e) {
+                e.preventDefault();
+                const touch = e.touches[0];
+                const rect = canvas.getBoundingClientRect();
+                touchX = touch.clientX - rect.left;
+            }
+            
+            function handleTouchMove(e) {
+                e.preventDefault();
+                if (touchX !== null) {
+                    const touch = e.touches[0];
+                    const rect = canvas.getBoundingClientRect();
+                    touchX = touch.clientX - rect.left;
+                }
+            }
+            
+            function handleTouchEnd(e) {
+                e.preventDefault();
+                touchX = null;
+            }
+            
+            function handleMouseDown(e) {
+                const rect = canvas.getBoundingClientRect();
+                touchX = e.clientX - rect.left;
+            }
+            
+            function handleMouseMove(e) {
+                if (touchX !== null) {
+                    const rect = canvas.getBoundingClientRect();
+                    touchX = e.clientX - rect.left;
+                }
+            }
+            
+            function handleMouseUp(e) {
+                touchX = null;
+            }
+            
+            // Game objects
+            class FallingObject {
+                constructor() {
+                    this.width = 30;
+                    this.height = 30;
+                    this.x = Math.random() * (canvas.width - this.width);
+                    this.y = -this.height;
+                    this.type = Math.random() > 0.7 ? 'bomb' : 'star'; // 30% chance for bomb
+                    this.speed = objectSpeed + Math.random() * 2;
+                }
+                
+                update() {
+                    this.y += this.speed;
+                }
+                
+                draw() {
+                    if (this.type === 'star') {
+                        // Draw star
+                        ctx.fillStyle = '#FFD700';
+                        ctx.beginPath();
+                        const spikes = 5;
+                        const outerRadius = this.width / 2;
+                        const innerRadius = outerRadius / 2;
+                        let rot = Math.PI / 2 * 3;
+                        const step = Math.PI / spikes;
+                        
+                        ctx.translate(this.x + this.width / 2, this.y + this.height / 2);
+                        ctx.moveTo(0, -outerRadius);
+                        
+                        for (let i = 0; i < spikes; i++) {
+                            ctx.lineTo(Math.cos(rot) * outerRadius, Math.sin(rot) * outerRadius);
+                            rot += step;
+                            ctx.lineTo(Math.cos(rot) * innerRadius, Math.sin(rot) * innerRadius);
+                            rot += step;
+                        }
+                        
+                        ctx.lineTo(0, -outerRadius);
+                        ctx.closePath();
+                        ctx.fill();
+                        ctx.setTransform(1, 0, 0, 1, 0, 0);
+                    } else {
+                        // Draw bomb
+                        ctx.fillStyle = '#333';
+                        ctx.beginPath();
+                        ctx.arc(this.x + this.width / 2, this.y + this.height / 2, this.width / 2, 0, Math.PI * 2);
+                        ctx.fill();
+                        
+                        // Draw fuse
+                        ctx.strokeStyle = '#8B4513';
+                        ctx.lineWidth = 2;
+                        ctx.beginPath();
+                        ctx.moveTo(this.x + this.width / 2, this.y);
+                        ctx.lineTo(this.x + this.width / 2 - 5, this.y - 10);
+                        ctx.stroke();
+                        
+                        // Draw spark
+                        ctx.fillStyle = '#FF4500';
+                        ctx.beginPath();
+                        ctx.arc(this.x + this.width / 2 - 5, this.y - 10, 3, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+                
+                isOffScreen() {
+                    return this.y > canvas.height;
+                }
+                
+                collidesWith(basket) {
+                    return this.x < basketX + basketWidth &&
+                           this.x + this.width > basketX &&
+                           this.y < basketY + basketHeight &&
+                           this.y + this.height > basketY;
+                }
+            }
+            
+            // Game functions
+            function updateBasket() {
+                if (touchX !== null) {
+                    const targetX = touchX - basketWidth / 2;
+                    const diff = targetX - basketX;
+                    basketX += diff * 0.2; // Smooth movement
+                    
+                    // Keep basket within bounds
+                    if (basketX < 0) basketX = 0;
+                    if (basketX + basketWidth > canvas.width) basketX = canvas.width - basketWidth;
+                }
+            }
+            
+            function drawBasket() {
+                ctx.fillStyle = '#8B4513';
+                ctx.fillRect(basketX, basketY, basketWidth, basketHeight);
+                
+                // Basket pattern
+                ctx.strokeStyle = '#654321';
+                ctx.lineWidth = 2;
+                for (let i = 0; i < basketWidth; i += 10) {
+                    ctx.beginPath();
+                    ctx.moveTo(basketX + i, basketY);
+                    ctx.lineTo(basketX + i, basketY + basketHeight);
+                    ctx.stroke();
+                }
+            }
+            
+            function spawnObject() {
+                if (frameCount % spawnRate === 0) {
+                    fallingObjects.push(new FallingObject());
+                    
+                    // Gradually increase difficulty
+                    if (score > 0 && score % 10 === 0 && spawnRate > 20) {
+                        spawnRate -= 2;
+                    }
+                    
+                    if (score > 0 && score % 15 === 0) {
+                        objectSpeed += 0.5;
+                    }
+                }
+            }
+            
+            function updateObjects() {
+                for (let i = fallingObjects.length - 1; i >= 0; i--) {
+                    const obj = fallingObjects[i];
+                    obj.update();
+                    
+                    if (obj.isOffScreen()) {
+                        fallingObjects.splice(i, 1);
+                        continue;
+                    }
+                    
+                    if (obj.collidesWith()) {
+                        if (obj.type === 'star') {
+                            score += 1;
+                            scoreElement.textContent = score;
+                        } else {
+                            lives -= 1;
+                            livesElement.textContent = lives;
+                            
+                            if (lives <= 0) {
+                                gameOver();
+                            }
+                        }
+                        fallingObjects.splice(i, 1);
+                    }
+                }
+            }
+            
+            function drawBackground() {
+                // Draw stars in background
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+                for (let i = 0; i < 50; i++) {
+                    const x = (i * 73) % canvas.width;
+                    const y = (i * 37) % canvas.height;
+                    const size = (i % 3) + 1;
+                    ctx.beginPath();
+                    ctx.arc(x, y, size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+            
+            function gameLoop() {
+                if (!gameRunning) return;
+                
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                drawBackground();
+                
+                updateBasket();
+                drawBasket();
+                
+                spawnObject();
+                updateObjects();
+                
+                fallingObjects.forEach(obj => obj.draw());
+                
+                frameCount++;
+                requestAnimationFrame(gameLoop);
+            }
+            
+            function startGame() {
+                gameRunning = true;
+                score = 0;
+                lives = 3;
+                fallingObjects = [];
+                objectSpeed = 3;
+                spawnRate = 60;
+                frameCount = 0;
+                basketX = canvas.width / 2 - basketWidth / 2;
+                
+                scoreElement.textContent = score;
+                livesElement.textContent = lives;
+                
+                startScreen.classList.add('hidden');
+                gameOverScreen.classList.add('hidden');
+                
+                gameLoop();
+            }
+            
+            function gameOver() {
+                gameRunning = false;
+                finalScoreElement.textContent = score;
+                gameOverScreen.classList.remove('hidden');
+            }
+            
+            startBtn.addEventListener('click', startGame);
+            restartBtn.addEventListener('click', startGame);
+        });
+    </script>
+</body>
+</html>
