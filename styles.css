@@ -1,0 +1,201 @@
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+            touch-action: none;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(to bottom, #1a2a6c, #2c5282);
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        .game-container {
+            width: 100%;
+            max-width: 400px;
+            height: 100vh;
+            max-height: 700px;
+            position: relative;
+            background: linear-gradient(to bottom, #0f2027, #203a43, #2c5364);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            touch-action: none;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            touch-action: none;
+        }
+
+        .game-ui {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 12px 15px;
+            display: flex;
+            justify-content: space-between;
+            color: white;
+            font-size: 18px;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .game-ui .high-score, .game-ui .level {
+            font-size: 13px;
+            opacity: 0.85;
+        }
+
+        .game-ui .level { color: #FFD700; }
+
+        .lives-display { text-align: right; padding-right: 40px; font-size: 15px; }
+        .heart { color: #FF6B81; font-size: 18px; }
+        .heart.lost { opacity: 0.25; filter: grayscale(1); }
+
+        .combo-display {
+            position: absolute;
+            top: 80px;
+            left: 15px;
+            color: #FFD700;
+            font-weight: bold;
+            font-size: 20px;
+            text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.6);
+            z-index: 10;
+            pointer-events: none;
+            transition: transform 0.1s ease;
+        }
+
+        .game-over, .game-start, .game-paused {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.75);
+            color: white;
+            text-align: center;
+            z-index: 20;
+        }
+
+        .game-over h2, .game-start h2, .game-paused h2 {
+            font-size: 32px;
+            margin-bottom: 20px;
+        }
+
+        .game-over p, .game-start p, .game-paused p {
+            font-size: 16px;
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+
+        .game-start p { margin-bottom: 25px; opacity: 0.9; }
+        .game-over .stats { opacity: 0.85; font-size: 14px; }
+        .new-record { color: #FFD700; font-weight: bold; font-size: 20px; }
+
+        .btn {
+            padding: 12px 30px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            font-size: 18px;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            -webkit-tap-highlight-color: rgba(0,0,0,0);
+            margin: 5px;
+        }
+
+        .btn:hover { background-color: #45a049; transform: scale(1.05); }
+
+        .btn-secondary { background-color: #2196F3; }
+        .btn-secondary:hover { background-color: #0b7dda; }
+
+        .hidden { display: none; }
+
+        .power-up-indicator {
+            position: absolute;
+            bottom: 15px;
+            left: 15px;
+            color: white;
+            font-size: 13px;
+            background-color: rgba(0, 0, 0, 0.55);
+            padding: 6px 12px;
+            border-radius: 15px;
+            z-index: 10;
+            min-width: 140px;
+        }
+
+        .power-up-timer {
+            height: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+
+        .power-up-timer div {
+            height: 100%;
+            width: 100%;
+            background: #FFD700;
+            border-radius: 2px;
+        }
+
+        .pause-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 32px;
+            height: 32px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 15;
+            cursor: pointer;
+            -webkit-tap-highlight-color: rgba(0,0,0,0);
+        }
+
+        .pause-btn::before, .pause-btn::after {
+            content: '';
+            width: 4px;
+            height: 14px;
+            background-color: white;
+            margin: 0 2px;
+        }
+
+        .sound-btn {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            width: 36px;
+            height: 36px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 16px;
+            z-index: 15;
+            cursor: pointer;
+            -webkit-tap-highlight-color: rgba(0,0,0,0);
+        }

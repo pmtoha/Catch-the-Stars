@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Catch the Stars</title>
+
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-ui">
+            <div>
+                <div>Score: <span id="score">0</span></div>
+                <div class="high-score">High Score: <span id="highScore">0</span></div>
+                <div class="level">Level: <span id="level">1</span></div>
+            </div>
+            <div class="lives-display">
+                Lives
+                <div id="lives"></div>
+            </div>
+        </div>
+
+        <div class="combo-display hidden" id="comboDisplay"></div>
+
+        <div class="pause-btn" id="pauseBtn"></div>
+        <div class="sound-btn" id="soundBtn">🔊</div>
+
+        <div class="power-up-indicator hidden" id="powerUpIndicator">
+            <span id="powerUpName"></span>
+            <div class="power-up-timer"><div id="powerUpBar"></div></div>
+        </div>
+
+        <canvas id="gameCanvas"></canvas>
+
+        <div class="game-start" id="startScreen">
+            <h2>⭐ Catch the Stars</h2>
+            <p>Catch falling stars to score points.<br>
+               Chain catches to build a combo multiplier!<br>
+               Grab power-ups and avoid the bombs.</p>
+            <p style="font-size:13px; opacity:0.7;">
+                🖱️ Mouse &nbsp;•&nbsp; 👆 Touch &nbsp;•&nbsp; ⌨️ Arrow keys<br>
+                P = pause &nbsp;•&nbsp; M = mute
+            </p>
+            <button class="btn" id="startBtn">Play Game</button>
+        </div>
+
+        <div class="game-over hidden" id="gameOverScreen">
+            <h2>Game Over</h2>
+            <p class="new-record hidden" id="newRecord">🏆 New High Score!</p>
+            <p>Your score: <strong id="finalScore">0</strong></p>
+            <p class="stats">Level reached: <span id="finalLevel">1</span> • Best combo: <span id="finalCombo">0</span></p>
+            <p class="stats">High score: <span id="finalHighScore">0</span></p>
+            <button class="btn" id="restartBtn">Play Again</button>
+        </div>
+
+        <div class="game-paused hidden" id="pausedScreen">
+            <h2>Game Paused</h2>
+            <button class="btn" id="resumeBtn">Resume</button>
+            <button class="btn btn-secondary" id="quitBtn">Quit Game</button>
+        </div>
+    </div>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="script.js"></script>
+</body>
+</html>

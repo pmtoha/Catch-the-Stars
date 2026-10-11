@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Catch the Stars</title>
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-ui">
+            <div>
+                <div>Score: <span id="score">0</span></div>
+                <div class="high-score">High Score: <span id="highScore">0</span></div>
+            </div>
+            <div>Lives: <span id="lives">3</span></div>
+        </div>
+        
+        <div class="pause-btn" id="pauseBtn"></div>
+        
+        <div class="power-up-indicator hidden" id="powerUpIndicator"></div>
+        
+        <canvas id="gameCanvas"></canvas>
+        
+        <div class="game-start" id="startScreen">
+            <h2>Catch the Stars</h2>
+            <p>Move the basket to catch falling stars.<br>Avoid the bombs and collect power-ups!</p>
+            <button class="btn" id="startBtn">Play Game</button>
+        </div>
+        
+        <div class="game-over hidden" id="gameOverScreen">
+            <h2>Game Over</h2>
+            <p>Your score: <span id="finalScore">0</span></p>
+            <p>High score: <span id="finalHighScore">0</span></p>
+            <button class="btn" id="restartBtn">Play Again</button>
+        </div>
+        
+        <div class="game-paused hidden" id="pausedScreen">
+            <h2>Game Paused</h2>
+            <button class="btn" id="resumeBtn">Resume</button>
+            <button class="btn btn-secondary" id="quitBtn">Quit Game</button>
+        </div>
+    </div>
+
+  <link rel="stylesheet" href="styles.css" />
+  <script src="script.js"></script>
+
+</body>
+</html>
